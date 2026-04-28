@@ -1,0 +1,329 @@
+openapi: 3.0.3
+
+info:
+  title: Real Estate Investment Tracker API
+  version: 1.0.0
+  description: API for managing properties, financial records, and watchlist for real estate investors.
+
+servers:
+  - url: http://localhost:3000/api
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string }
+        createdAt:
+          type: string
+          format: date-time
+
+    Property:
+      type: object
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        address: { type: string }
+        city: { type: string }
+        state: { type: string }
+        propertyType: { type: string }
+        status: { type: string }
+        purchasePrice: { type: number }
+        createdAt:
+          type: string
+          format: date-time
+
+    FinancialRecord:
+      type: object
+      properties:
+        id: { type: integer }
+        propertyId: { type: integer }
+        type: { type: string }
+        category: { type: string }
+        amount: { type: number }
+        date:
+          type: string
+          format: date
+        notes: { type: string }
+
+    WatchlistItem:
+      type: object
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        propertyId: { type: integer }
+        targetPrice: { type: number }
+        notes: { type: string }
+        addedAt:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []
+
+paths:
+
+  /auth/signup:
+    post:
+      tags: [Auth]
+      summary: Create user account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string }
+                email: { type: string }
+                password: { type: string }
+      responses:
+        201:
+          description: User created
+        400:
+          description: Bad Request
+        409:
+          description: Email already exists
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        200:
+          description: Returns JWT token
+        401:
+          description: Invalid credentials
+
+  /properties:
+    post:
+      tags: [Properties]
+      summary: Create property
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [address, city, state, propertyType, status, purchasePrice]
+              properties:
+                address: { type: string }
+                city: { type: string }
+                state: { type: string }
+                propertyType: { type: string }
+                status: { type: string }
+                purchasePrice: { type: number }
+      responses:
+        201:
+          description: Property created
+
+    get:
+      tags: [Properties]
+      summary: Get all user properties
+      responses:
+        200:
+          description: List of properties
+
+  /properties/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+
+    get:
+      tags: [Properties]
+      summary: Get property by ID
+      responses:
+        200:
+          description: Success
+        403:
+          description: Forbidden
+        404:
+          description: Not found
+
+    put:
+      tags: [Properties]
+      summary: Update property
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        200:
+          description: Updated
+
+    delete:
+      tags: [Properties]
+      summary: Delete property
+      responses:
+        200:
+          description: Deleted
+
+  /financial-records:
+    post:
+      tags: [Financial Records]
+      summary: Create financial record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [propertyId, type, category, amount, date]
+              properties:
+                propertyId: { type: integer }
+                type: { type: string }
+                category: { type: string }
+                amount: { type: number }
+                date:
+                  type: string
+                  format: date
+                notes: { type: string }
+      responses:
+        201:
+          description: Created
+        403:
+          description: Forbidden
+
+    get:
+      tags: [Financial Records]
+      summary: Get financial records
+      parameters:
+        - in: query
+          name: property_id
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Success
+
+  /financial-records/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+
+    get:
+      tags: [Financial Records]
+      summary: Get record by ID
+      responses:
+        200:
+          description: Found
+        403:
+          description: Forbidden
+        404:
+          description: Not found
+
+    put:
+      tags: [Financial Records]
+      summary: Update record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        200:
+          description: Updated
+
+    delete:
+      tags: [Financial Records]
+      summary: Delete record
+      responses:
+        200:
+          description: Deleted
+
+  /watchlist:
+    post:
+      tags: [Watchlist]
+      summary: Add property to watchlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [propertyId]
+              properties:
+                propertyId: { type: integer }
+                targetPrice: { type: number }
+                notes: { type: string }
+      responses:
+        201:
+          description: Created
+        409:
+          description: Already exists
+
+    get:
+      tags: [Watchlist]
+      summary: Get user watchlist
+      responses:
+        200:
+          description: Success
+
+  /watchlist/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+
+    get:
+      tags: [Watchlist]
+      summary: Get watchlist item
+      responses:
+        200:
+          description: Found
+        403:
+          description: Forbidden
+        404:
+          description: Not found
+
+    put:
+      tags: [Watchlist]
+      summary: Update watchlist item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        200:
+          description: Updated
+
+    delete:
+      tags: [Watchlist]
+      summary: Remove watchlist item
+      responses:
+        200:
+          description: Deleted

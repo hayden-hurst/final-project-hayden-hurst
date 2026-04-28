@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+
+  properties     Property[]
+  watchlistItems WatchlistItem[]
+}
+
+model Property {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  address       String
+  city          String
+  state         String
+  propertyType  String
+  status        String
+  purchasePrice Float
+  createdAt     DateTime @default(now())
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  financialRecords FinancialRecord[]
+  watchlistItems   WatchlistItem[]
+}
+
+model FinancialRecord {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  type       String
+  category   String
+  amount     Float
+  date       DateTime
+  notes      String?
+  createdAt  DateTime @default(now())
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model WatchlistItem {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  propertyId  Int
+  targetPrice Float?
+  notes       String?
+  addedAt     DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+}
