@@ -6,7 +6,10 @@ info:
   description: API for managing properties, financial records, and watchlist for real estate investors.
 
 servers:
+  - url: https://your-render-app.onrender.com/api
+    description: Production
   - url: http://localhost:3000/api
+    description: Local
 
 components:
   securitySchemes:
