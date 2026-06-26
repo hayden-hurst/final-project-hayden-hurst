@@ -1,3 +1,3 @@
-# Final Project Template
+# Real Estate Investment Tracker
 
-This repository provides the **folder structure** for your team’s final project. All implementation is left to students.
+API for managing properties, financial records, and watchlist for real estate investors.
